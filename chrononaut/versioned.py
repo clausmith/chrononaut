@@ -7,6 +7,7 @@ from chrononaut.history_mapper import extend_mapper
 from chrononaut.models import HistorySnapshot
 from chrononaut.flask_versioning import (
     chrononaut_snapshot_to_model,
+    serialize_key,
     UTC,
 )
 from datetime import datetime
@@ -88,7 +89,7 @@ class Versioned(ChangeInfoMixin):
         prim_keys = [
             mapper.get_property_by_column(k).key for k in mapper.primary_key if k.key != "version"
         ]
-        obj_key = {k: getattr(self, k) for k in prim_keys}
+        obj_key = {k: serialize_key(getattr(self, k)) for k in prim_keys}
 
         # Find all previous versions that have the same primary keys and table name as myself
         query = activity.query.filter(

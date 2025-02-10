@@ -1,5 +1,5 @@
-"""Flask versioning extension. Requires g and _app_ctx_stack in looking for extra recorded changes.
-"""
+"""Flask versioning extension. Requires g and _app_ctx_stack in looking for extra recorded changes."""
+
 from flask import g, current_app, has_app_context
 from datetime import datetime
 from dateutil.tz import tzutc
@@ -22,6 +22,12 @@ def serialize_datetime(dt):
         return dt.astimezone(UTC).replace(tzinfo=None).isoformat() + "+00:00"
     except TypeError:
         return dt.replace(tzinfo=None).isoformat() + "+00:00"
+
+
+def serialize_key(val):
+    if isinstance(val, int) or isinstance(val, str):
+        return val
+    return str(val)
 
 
 def _get_tracked_columns(obj, obj_mapper=None):
@@ -198,7 +204,7 @@ def create_version(obj, session, created=False, deleted=False):
         for k in obj_mapper.primary_key
         if k.key != "version"
     ]
-    key = {k: getattr(obj, k) for k in primary_keys}
+    key = {k: serialize_key(getattr(obj, k)) for k in primary_keys}
 
     # create the history object (except any hidden cols)
     activity = obj.metadata._activity_cls()
